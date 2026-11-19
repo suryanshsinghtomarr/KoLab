@@ -18,9 +18,8 @@ const registerCodeHandlers = (io, socket) => {
   })
 
   socket.on('language-change', ({ roomId, language } = {}) => {
-    if (socket.data.roomId !== roomId || typeof language !== 'string') return
-    io.to(roomId).emit('language-change', { language })
-    Room.updateOne({ roomId }, { $set: { language } }).catch((error) => console.error('Could not save room language:', error.message))
+    if (socket.data.roomId !== roomId) return
+    return
   })
 
   socket.on('run-code', async ({ roomId, code, language } = {}, callback = () => {}) => {

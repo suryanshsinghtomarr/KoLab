@@ -11,7 +11,9 @@ const resolveRoomName = (room, roomId) => {
 const normalizeRoom = (room) => {
   const value = room.toObject ? room.toObject() : { ...room }
   const name = resolveRoomName(value, value.roomId)
-  return { ...value, name, roomName: name, title: name }
+  const supportedLanguages = ['javascript', 'typescript', 'python', 'java', 'cpp']
+  const language = supportedLanguages.includes(value.language) ? value.language : 'javascript'
+  return { ...value, name, roomName: name, title: name, language }
 }
 
 const createRoom = async (req, res) => {
@@ -25,6 +27,8 @@ const createRoom = async (req, res) => {
         ? req.body.title
         : ''
   const name = requestedName.trim()
+  const supportedLanguages = ['javascript', 'typescript', 'python', 'java', 'cpp']
+  const language = supportedLanguages.includes(req.body.language) ? req.body.language : 'javascript'
   const room = await Room.create({
     roomId,
     name: name || roomId,
@@ -32,7 +36,7 @@ const createRoom = async (req, res) => {
     title: name || roomId,
     owner: req.user._id,
     participants: [req.user._id],
-    language: req.body.language || 'javascript',
+    language,
   })
   res.status(201).json({ room: normalizeRoom(room) })
 }

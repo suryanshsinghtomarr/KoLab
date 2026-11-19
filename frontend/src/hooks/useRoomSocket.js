@@ -3,9 +3,9 @@ import { getRoomMessages } from '../api/messageApi'
 import { socket } from '../socket/socket'
 import { debounce } from '../utils/debounce'
 
-export default function useRoomSocket(roomId) {
+export default function useRoomSocket(roomId, initialLanguage) {
   const [code, setCode] = useState('')
-  const [language, setLanguage] = useState('javascript')
+  const [language, setLanguage] = useState(initialLanguage || 'javascript')
   const [messages, setMessages] = useState([])
   const [participants, setParticipants] = useState([])
   const [error, setError] = useState('')
@@ -70,5 +70,9 @@ export default function useRoomSocket(roomId) {
     socket.emit('send-message', { roomId, text }, resolve)
   }), [roomId])
 
-  return { code, language, messages, participants, error, output, running, changeCode, changeLanguage, sendMessage }
+  const setExecutionRunning = useCallback((nextRunning) => setRunning(nextRunning), [])
+  const setExecutionOutput = useCallback((nextOutput) => setOutput(nextOutput), [])
+  const setRoomLanguage = useCallback((nextLanguage) => setLanguage(nextLanguage), [])
+
+  return { code, language, messages, participants, error, output, running, changeCode, changeLanguage, sendMessage, setExecutionRunning, setExecutionOutput, setRoomLanguage }
 }

@@ -28,7 +28,7 @@ export default function Dashboard() {
   if (loading) return <Loader />
   return <main className="page dashboard">
     <Toast message={toast} type="error" onClose={() => setToast('')} />
-    <div className="room-header"><div><p className="eyebrow">WORKSPACE</p><h1>Dashboard</h1></div><button className="primary" onClick={() => navigate('/')}>＋ New room</button></div>
+    <div className="room-header"><div><p className="eyebrow">WORKSPACE</p><h1>Dashboard</h1></div><button className="neutral-action dashboard-new-room" onClick={() => navigate('/')}>＋ New room</button></div>
     <section className="rooms">
       <h2>Your rooms</h2>
       {rooms.length ? rooms.map((room) => <article className="room-row" key={room.roomId} onClick={() => navigate(`/rooms/${room.roomId}`)}>

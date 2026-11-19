@@ -5,6 +5,7 @@ import * as roomApi from '../api/roomApi'
 export default function Home() {
   const [roomId, setRoomId] = useState('')
   const [roomName, setRoomName] = useState('')
+  const [roomLanguage, setRoomLanguage] = useState('javascript')
   const [showCreate, setShowCreate] = useState(false)
   const [rooms, setRooms] = useState([])
   const [error, setError] = useState('')
@@ -16,10 +17,15 @@ export default function Home() {
   }
   const create = async (event) => {
     event.preventDefault()
+    const name = roomName.trim()
+    if (!name) {
+      setError('Enter a room name')
+      return
+    }
     try {
-      const name = roomName.trim()
-      const { data } = await roomApi.createRoom({ name, roomName: name, title: name })
+      const { data } = await roomApi.createRoom({ name, roomName: name, title: name, language: roomLanguage })
       setRoomName('')
+      setRoomLanguage('javascript')
       setShowCreate(false)
       navigate(`/rooms/${data.room.roomId}`)
     } catch {
@@ -34,9 +40,16 @@ export default function Home() {
       <p className="lead">Create a room, invite your team, and build something great together.</p>
     </section>
     <section className="actions">
-      <button className="primary" type="button" onClick={() => setShowCreate((visible) => !visible)}>＋ Create a room</button>
+      <button className="neutral-action" type="button" onClick={() => setShowCreate((visible) => !visible)}>＋ Create a room</button>
       {showCreate && <form className="create-room-form" onSubmit={create}>
         <input aria-label="Room name" placeholder="Enter room name" value={roomName} onChange={(event) => setRoomName(event.target.value)} autoFocus />
+        <select aria-label="Language" value={roomLanguage} onChange={(event) => setRoomLanguage(event.target.value)}>
+          <option value="javascript">JavaScript</option>
+          <option value="typescript">TypeScript</option>
+          <option value="python">Python</option>
+          <option value="java">Java</option>
+          <option value="cpp">C++</option>
+        </select>
         <button className="secondary" type="submit">Create</button>
       </form>}
       <form onSubmit={join}>
