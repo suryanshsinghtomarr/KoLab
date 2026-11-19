@@ -3,17 +3,44 @@ const Message = require('../models/Message')
 const Session = require('../models/Session')
 const generateRoomId = require('../utils/generateRoomId')
 
+const resolveRoomName = (room, roomId) => {
+  const source = room?.name || room?.roomName || room?.title
+  return typeof source === 'string' && source.trim() ? source.trim() : roomId
+}
+
+const normalizeRoom = (room) => {
+  const value = room.toObject ? room.toObject() : { ...room }
+  const name = resolveRoomName(value, value.roomId)
+  return { ...value, name, roomName: name, title: name }
+}
+
 const createRoom = async (req, res) => {
   let roomId
   do { roomId = generateRoomId() } while (await Room.exists({ roomId }))
-  const room = await Room.create({ roomId, owner: req.user._id, participants: [req.user._id], language: req.body.language || 'javascript' })
-  res.status(201).json({ room })
+  const requestedName = typeof req.body.name === 'string'
+    ? req.body.name
+    : typeof req.body.roomName === 'string'
+      ? req.body.roomName
+      : typeof req.body.title === 'string'
+        ? req.body.title
+        : ''
+  const name = requestedName.trim()
+  const room = await Room.create({
+    roomId,
+    name: name || roomId,
+    roomName: name || roomId,
+    title: name || roomId,
+    owner: req.user._id,
+    participants: [req.user._id],
+    language: req.body.language || 'javascript',
+  })
+  res.status(201).json({ room: normalizeRoom(room) })
 }
 
 const getRoom = async (req, res) => {
   const room = await Room.findOne({ roomId: req.params.roomId }).populate('owner', 'name').populate('participants', 'name email')
   if (!room) return res.status(404).json({ message: 'Room not found' })
-  res.json({ room })
+  res.json({ room: normalizeRoom(room) })
 }
 
 const joinRoom = async (req, res) => {
@@ -23,12 +50,13 @@ const joinRoom = async (req, res) => {
     { new: true },
   )
   if (!room) return res.status(404).json({ message: 'Room not found' })
-  res.json({ room })
+  res.json({ room: normalizeRoom(room) })
 }
 
 const getMyRooms = async (req, res) => {
   const rooms = await Room.find({ participants: req.user._id }).sort({ updatedAt: -1 }).populate('owner', 'name')
-  res.json({ rooms })
+  const normalizedRooms = rooms.map(normalizeRoom)
+  res.json({ rooms: normalizedRooms })
 }
 
 const deleteRoom = async (req, res) => {
