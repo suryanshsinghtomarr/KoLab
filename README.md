@@ -1,4 +1,5 @@
-# KoLab -
+# KoLab
+
 A collaborative code editor built with the MERN stack and Socket.io. Share a room ID with others to write code together in real time, chat on the side, and run your code directly in the browser.
 
 ## What it does
