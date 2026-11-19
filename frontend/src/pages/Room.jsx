@@ -4,7 +4,6 @@ import * as roomApi from '../api/roomApi'
 import * as executeApi from '../api/executeApi'
 import * as sessionApi from '../api/sessionApi'
 import CodeEditor from '../components/CodeEditor'
-import LanguageSelector from '../components/LanguageSelector'
 import ChatPanel from '../components/ChatPanel'
 import ParticipantsList from '../components/ParticipantsList'
 import useRoomSocket from '../hooks/useRoomSocket'
@@ -28,5 +27,5 @@ export default function Room() {
   const copyLink = async () => { await navigator.clipboard.writeText(window.location.href); setToast('Room link copied') }
   if (error) return <main className="page"><p className="error">{error}</p></main>
   if (!room) return <div className="loading">Loading room...</div>
-  return <main className="page room-page"><Toast message={toast} onClose={() => setToast('')} /><div className="room-header"><div><p className="eyebrow">ROOM</p><h1>{room.roomId}</h1></div><LanguageSelector language={liveRoom.language} onChange={liveRoom.changeLanguage} /></div><Toolbar onRun={run} onSave={save} onCopy={copyLink} onLeave={() => navigate('/')} running={liveRoom.running} />{liveRoom.error && <p className="error">{liveRoom.error}</p>}<div className="room-layout"><section><div className="editor-card"><CodeEditor code={liveRoom.code} language={liveRoom.language} onChange={liveRoom.changeCode} /></div><OutputConsole output={liveRoom.output} running={liveRoom.running} /></section><aside><ParticipantsList participants={liveRoom.participants} /><ChatPanel messages={liveRoom.messages} onSend={liveRoom.sendMessage} /></aside></div></main>
+  return <main className="page room-page"><Toast message={toast} onClose={() => setToast('')} /><Toolbar roomId={room.roomId} language={liveRoom.language} onLanguageChange={liveRoom.changeLanguage} onRun={run} onSave={save} onCopy={copyLink} onLeave={() => navigate('/')} running={liveRoom.running} />{liveRoom.error && <p className="error room-error">{liveRoom.error}</p>}<div className="room-layout"><section className="editor-column"><div className="editor-card"><CodeEditor code={liveRoom.code} language={liveRoom.language} onChange={liveRoom.changeCode} /></div><OutputConsole output={liveRoom.output} running={liveRoom.running} /></section><aside className="room-sidebar"><ParticipantsList participants={liveRoom.participants} /><ChatPanel messages={liveRoom.messages} onSend={liveRoom.sendMessage} /></aside></div></main>
 }
