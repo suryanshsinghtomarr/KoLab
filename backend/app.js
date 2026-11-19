@@ -8,7 +8,17 @@ const sessionRoutes = require('./routes/sessionRoutes')
 const { notFound, errorHandler } = require('./middleware/errorMiddleware')
 
 const app = express()
-app.use(cors({ origin: process.env.CLIENT_URL || 'http://localhost:5173' }))
+const allowedOrigins = [
+  process.env.CLIENT_URL,
+  'https://ko-lab.vercel.app',
+  'http://localhost:5173',
+].filter(Boolean)
+app.use(cors({
+  origin(origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) return callback(null, true)
+    return callback(new Error('Not allowed by CORS'))
+  },
+}))
 app.use(express.json())
 app.get('/api/health', (req, res) => res.json({ status: 'ok' }))
 app.use('/api/auth', authRoutes)
