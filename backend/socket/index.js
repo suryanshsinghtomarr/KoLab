@@ -6,13 +6,23 @@ const registerCodeHandlers = require('./codeHandlers')
 const registerChatHandlers = require('./chatHandlers')
 
 const createSocketServer = (httpServer) => {
-  const allowedOrigins = [
-    process.env.CLIENT_URL,
+  const normalizeOrigin = (origin) => origin?.replace(/\/+$/, '')
+  const allowedOrigins = new Set([
+    normalizeOrigin(process.env.CLIENT_URL),
     'https://ko-lab.vercel.app',
     'http://localhost:5173',
-  ].filter(Boolean)
+    'http://127.0.0.1:5173',
+  ].filter(Boolean))
   const io = new Server(httpServer, {
-    cors: { origin: allowedOrigins },
+    cors: {
+      origin(origin, callback) {
+        if (!origin || allowedOrigins.has(normalizeOrigin(origin))) return callback(null, true)
+        return callback(new Error('Not allowed by CORS'))
+      },
+      credentials: true,
+      methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+      allowedHeaders: ['Content-Type', 'Authorization'],
+    },
   })
 
   io.use(async (socket, next) => {
